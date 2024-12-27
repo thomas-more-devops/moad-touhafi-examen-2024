@@ -1,7 +1,6 @@
-const { defineConfig } = require('@vue/cli-service');
-const webpack = require('webpack'); // Add this line
+const webpack = require('webpack'); // Importing webpack
 
-module.exports = defineConfig({
+module.exports = {
   transpileDependencies: true,
   devServer: {
     host: process.env.VUE_APP_HOST || 'localhost',
@@ -16,4 +15,4 @@ module.exports = defineConfig({
       }),
     ],
   },
-});
+};
