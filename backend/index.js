@@ -1,109 +1,122 @@
-// Importeren van de express module in node_modules
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-const bodyParser = require('body-parser');
-const Database = require('./classes/database.js');
+// Import modules
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
+import Database from './classes/database.js';
 
-// Aanmaken van een express app
+// Load environment variables
+dotenv.config();
+
+// Create an Express app
 const app = express();
-// Configureren van de PORT en HOST
+
+// Configure the server
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || 'localhost';
 
 // Enable CORS
 app.use(cors({
-    origin: process.env.cors_origin, // Allow requests from this origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    origin: process.env.cors_origin,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Middleware om JSON-requests te parsen
+// Middleware to parse JSON requests
 app.use(bodyParser.json());
 
 // Endpoints
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+    res.send('Hello World!');
 });
 
-app.get('/api/artists', (req, res) => {
+app.get('/api/artists', async (req, res) => {
     const db = new Database();
-    db.getQuery('SELECT * FROM artists').then((artists) => {
+    try {
+        const artists = await db.getQuery('SELECT * FROM artists');
         res.send(artists);
-    });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to fetch artists', details: error });
+    }
 });
 
-app.get('/api/votes', (req, res) => {
+app.get('/api/votes', async (req, res) => {
     const db = new Database();
-    db.getQuery('SELECT * FROM votes').then((votes) => {
+    try {
+        const votes = await db.getQuery('SELECT * FROM votes');
         res.send(votes);
-    });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to fetch votes', details: error });
+    }
 });
 
-app.get('/api/songs', (req, res) => {
+app.get('/api/songs', async (req, res) => {
     const db = new Database();
-    db.getQuery(`
-        SELECT
-            song_id, s.name AS song_name, a.name AS artist_name
-        FROM
-            songs AS s
-                INNER JOIN
-                    artists AS a
-                        ON
-                            s.artist_id = a.artist_id;
-    `).then((songs) => {
+    try {
+        const songs = await db.getQuery(`
+            SELECT
+                song_id, s.name AS song_name, a.name AS artist_name
+            FROM
+                songs AS s
+                INNER JOIN artists AS a ON s.artist_id = a.artist_id;
+        `);
         res.send(songs);
-    });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to fetch songs', details: error });
+    }
 });
 
-app.get('/api/ranking', (req, res) => {
+app.get('/api/ranking', async (req, res) => {
     const db = new Database();
-    db.getQuery(`
-        SELECT songs.song_id, songs.name AS song_name, artists.name AS artist_name, SUM(points) AS total_points
-        FROM
-            votes
-                INNER JOIN
-                    songs
-                        ON songs.song_id = votes.song_id
-                INNER JOIN
-                    artists
-                        ON songs.artist_id = artists.artist_id
-        GROUP BY song_id
-        ORDER BY SUM(points) DESC;
-    `).then((ranking) => {
+    try {
+        const ranking = await db.getQuery(`
+            SELECT songs.song_id, songs.name AS song_name, artists.name AS artist_name, SUM(points) AS total_points
+            FROM votes
+                INNER JOIN songs ON songs.song_id = votes.song_id
+                INNER JOIN artists ON songs.artist_id = artists.artist_id
+            GROUP BY song_id
+            ORDER BY SUM(points) DESC;
+        `);
         res.send(ranking);
-    });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to fetch ranking', details: error });
+    }
 });
 
-app.post('/api/artists', (req, res) => {
-    console.log(req.body);
+app.post('/api/artists', async (req, res) => {
     const { name } = req.body;
     const db = new Database();
-    console.log(name);
-    db.getQuery('INSERT INTO artists (name) VALUES (?)', [name])
-        .then(() => res.status(201).send({ message: 'Artist added successfully' }))
-        .catch((error) => res.status(500).send({ error: 'Failed to add artist', details: error }));
+    try {
+        await db.getQuery('INSERT INTO artists (name) VALUES (?)', [name]);
+        res.status(201).send({ message: 'Artist added successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to add artist', details: error });
+    }
 });
 
-app.post('/api/songs', (req, res) => {
+app.post('/api/songs', async (req, res) => {
     const { name, artist_id } = req.body;
     const db = new Database();
-    db.getQuery('INSERT INTO songs (name, artist_id) VALUES (?, ?)', [name, artist_id])
-        .then(() => res.status(201).send({ message: 'Song added successfully' }))
-        .catch((error) => res.status(500).send({ error: 'Failed to add song', details: error }));
+    try {
+        await db.getQuery('INSERT INTO songs (name, artist_id) VALUES (?, ?)', [name, artist_id]);
+        res.status(201).send({ message: 'Song added successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to add song', details: error });
+    }
 });
 
-// POST endpoint om een nieuwe stem toe te voegen
-app.post('/api/votes', (req, res) => {
+app.post('/api/votes', async (req, res) => {
     const { song_id, points } = req.body;
     const db = new Database();
-    db.getQuery('INSERT INTO votes (song_id, points) VALUES (?, ?)', [song_id, points])
-        .then(() => res.status(201).send({ message: 'Vote added successfully' }))
-        .catch((error) => res.status(500).send({ error: 'Failed to add vote', details: error }));
+    try {
+        await db.getQuery('INSERT INTO votes (song_id, points) VALUES (?, ?)', [song_id, points]);
+        res.status(201).send({ message: 'Vote added successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Failed to add vote', details: error });
+    }
 });
 
-// Starten van de server en op welke port de server moet luistere
+// Start the server
 app.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}/`);
 });
-"console.log('Test PR');" 

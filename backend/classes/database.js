@@ -1,5 +1,6 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+dotenv.config();
 
 class Database {
     async connect() {
@@ -16,10 +17,10 @@ class Database {
 
     async getQuery(sql, params) {
         const connection = await this.connect();
-        const [ rows ] = await connection.execute(sql, params);
+        const [rows] = await connection.execute(sql, params);
 
         return rows;
     }
 }
 
-module.exports = Database;
+export default Database;

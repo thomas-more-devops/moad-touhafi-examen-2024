@@ -1,29 +1,36 @@
-# 1. Gebruik een Node.js image om de applicatie te bouwen
+# 1. Use Node.js image to build the application
 FROM node:18 as build
 
-# 2. Stel de werkdirectory in
+# 2. Set working directory
 WORKDIR /app
 
-# 3. Kopieer package.json en package-lock.json
+# 3. Copy package.json and package-lock.json
 COPY package*.json ./
 
-# 4. Installeer dependencies
+# 4. Install dependencies
 RUN npm install
 
-# 5. Kopieer de rest van de bestanden
+# 5. Copy the rest of the files
 COPY . .
 
-# 6. Build de applicatie
+# 6. Set environment variable for build
+ARG VUE_APP_BACKEND_API_URL
+ENV VUE_APP_BACKEND_API_URL=${VUE_APP_BACKEND_API_URL}
+
+# 7. Build the application
 RUN npm run build
 
-# 7. Gebruik een lichtgewicht server image om de build te hosten
+# 8. Use a lightweight server to host the build
 FROM nginx:alpine
 
-# 8. Kopieer de gecompileerde bestanden naar de server directory
+# 9. Copy the built files to the NGINX directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# 9. Exposeer poort 80
+# 10. Add a custom Nginx configuration for routing API requests
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# 11. Expose port 80
 EXPOSE 80
 
-# 10. Start Nginx
+# 12. Start NGINX
 CMD ["nginx", "-g", "daemon off;"]

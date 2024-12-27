@@ -1,20 +1,20 @@
-# 1. Gebruik een officieel Node.js image
+# 1. Use Node.js image as a base
 FROM node:18
 
-# 2. Stel de werkdirectory in binnen de container
+# 2. Set working directory
 WORKDIR /app
 
-# 3. Kopieer package.json en package-lock.json naar de container
+# 3. Copy package.json and package-lock.json
 COPY package*.json ./
 
-# 4. Installeer de benodigde dependencies
+# 4. Install Node.js dependencies
 RUN npm install
 
-# 5. Kopieer de rest van de bestanden naar de container
+# 5. Copy the rest of the application files
 COPY . .
 
-# 6. Exposeer de poort die je backend gebruikt
+# 6. Expose the backend port
 EXPOSE 3000
 
-# 7. Start de applicatie
+# 7. Run the application
 CMD ["node", "index.js"]
