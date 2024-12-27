@@ -106,3 +106,4 @@ app.post('/api/votes', (req, res) => {
 app.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}/`);
 });
+"console.log('Test PR');" 

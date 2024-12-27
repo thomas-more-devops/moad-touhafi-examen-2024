@@ -1,0 +1,24 @@
+name: Build and Push Docker Images
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Backend Image
+        run: |
+          docker build -t ghcr.io/<jouw-gebruikersnaam>/<backend-image>:latest ./backend
+          docker push ghcr.io/<jouw-gebruikersnaam>/<backend-image>:latest
+      - name: Build and Push Frontend Image
+        run: |
+          docker build -t ghcr.io/<jouw-gebruikersnaam>/<frontend-image>:latest ./frontend
+          docker push ghcr.io/<jouw-gebruikersnaam>/<frontend-image>:latest

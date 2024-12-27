@@ -1,0 +1,73 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies (Backend)
+        run: |
+          cd backend
+          npm install
+
+      - name: Run Tests (Backend)
+        run: |
+          cd backend
+          npm test
+
+      - name: Install Dependencies (Frontend)
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run Tests (Frontend)
+        run: |
+          cd frontend
+          npm test
+
+  lint:
+    name: Run Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies (Backend)
+        run: |
+          cd backend
+          npm install
+
+      - name: Run Linter (Backend)
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Install Dependencies (Frontend)
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run Linter (Frontend)
+        run: |
+          cd frontend
+          npm run lint
