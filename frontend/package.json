@@ -6,10 +6,12 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "test": "npm run test:unit"
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "map-cache": "^0.2.2",
     "vue": "^2.6.14"
   },
   "devDependencies": {
@@ -45,7 +47,9 @@
     "rules": {}
   },
   "jest": {
-    "setupFiles": ["<rootDir>/tests/setup.js"],
+    "setupFiles": [
+      "<rootDir>/tests/setup.js"
+    ],
     "moduleFileExtensions": [
       "js",
       "json",
