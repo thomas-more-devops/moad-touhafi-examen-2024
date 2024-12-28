@@ -6,10 +6,8 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run Tests
+  setup:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -19,20 +17,37 @@ jobs:
         with:
           node-version: '18'
 
+      # Caching dependencies
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/backend/package-lock.json', '**/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install Dependencies (Backend)
         run: |
           cd backend
           npm install
 
-      - name: Run Tests (Backend)
-        run: |
-          cd backend
-          npm test
-
       - name: Install Dependencies (Frontend)
         run: |
           cd frontend
           npm install
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: setup  # Ensures the setup job runs before test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Tests (Backend)
+        run: |
+          cd backend
+          npm test
 
       - name: Run Tests (Frontend)
         run: |
@@ -42,30 +57,15 @@ jobs:
   lint:
     name: Run Linting
     runs-on: ubuntu-latest
-
+    needs: setup  # Ensures the setup job runs before lint
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Dependencies (Backend)
-        run: |
-          cd backend
-          npm install
 
       - name: Run Linter (Backend)
         run: |
           cd backend
           npm run lint
-
-      - name: Install Dependencies (Frontend)
-        run: |
-          cd frontend
-          npm install
 
       - name: Run Linter (Frontend)
         run: |

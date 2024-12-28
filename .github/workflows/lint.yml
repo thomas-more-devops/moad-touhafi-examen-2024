@@ -1,13 +1,33 @@
 name: Lint Code
 on: [push, pull_request]
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - run: npm install
-      - run: npm run lint
+
+      # For Frontend
+      - name: Install Dependencies (Frontend)
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Run Lint (Frontend)
+        run: npm run lint
+        working-directory: ./frontend
+
+      # For Backend
+      - name: Install Dependencies (Backend)
+        run: npm install
+        working-directory: ./backend
+
+      - name: Run Lint (Backend)
+        run: npm run lint
+        working-directory: ./backend
