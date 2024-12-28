@@ -1,13 +1,13 @@
 {
   "name": "eurosong-api-2024",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "test": "jest",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,11 @@
     "mysql2": "^3.11.3"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-typescript": "^7.26.0",
     "@eslint/js": "^9.17.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^9.17.0",
     "eslint-plugin-vue": "^9.32.0",
     "globals": "^15.14.0",

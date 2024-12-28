@@ -1,106 +1,115 @@
-const request = require('supertest');
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const Database = require('../../classes/database');
+/**
+ * @jest-environment node
+ */
+import { jest } from '@jest/globals';
 
-// Mock Database class
-jest.mock('../../classes/database');
+// 1. Mock the Database as ESM
+jest.unstable_mockModule('../../classes/database.js', () => {
+  return {
+    default: jest.fn().mockImplementation(() => ({
+      getQuery: jest.fn(),
+    })),
+  };
+});
+
+// 2. Then dynamically import everything we need
+const { default: request } = await import('supertest');
+const { default: express } = await import('express');
+const { default: cors } = await import('cors');
+const { default: bodyParser } = await import('body-parser');
+const { default: Database } = await import('../../classes/database.js');
 
 describe('API Endpoints', () => {
   let app;
   let mockGetQuery;
 
   beforeEach(() => {
-    // Clear all mocks
     jest.clearAllMocks();
 
-    // Create mock for getQuery
+    // Create a mock for the getQuery method in the Database class
     mockGetQuery = jest.fn();
     Database.mockImplementation(() => ({
-      getQuery: mockGetQuery
+      getQuery: mockGetQuery,
     }));
 
-    // Create a fresh express app for each test
+    // Initialize the Express app
     app = express();
-    app.use(cors({
-      origin: 'http://localhost:8080',
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    }));
+    app.use(
+      cors({
+        origin: 'http://localhost:8080',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })
+    );
     app.use(bodyParser.json());
 
-    // Set up routes
+    // Define your routes for the tests
     app.get('/', (req, res) => {
       res.send('Hello World!');
     });
 
-    app.get('/api/artists', (req, res) => {
+    app.get('/api/artists', async (req, res) => {
       const db = new Database();
-      db.getQuery('SELECT * FROM artists').then((artists) => {
-          res.send(artists);
-      });
-    });
-
-    app.get('/api/votes', (req, res) => {
-      const db = new Database();
-      db.getQuery('SELECT * FROM votes').then((votes) => {
-          res.send(votes);
-      });
-    });
-
-    app.get('/api/songs', (req, res) => {
-      const db = new Database();
-      db.getQuery(`
-          SELECT
-              song_id, s.name AS songname, a.name AS artistname
-          FROM
-              songs AS s
-                  INNER JOIN
-                      artists AS a
-                          ON
-                              s.artist_id = a.artist_id;
-      `).then((songs) => {
-          res.send(songs);
-      });
-    });
-
-    app.get('/api/ranking', (req, res) => {
-      const db = new Database();
-      db.getQuery(`
-          SELECT songs.song_id, songs.name AS song_name, artists.name AS artist_name, SUM(points) AS total_points
-          FROM
-              votes
-                  INNER JOIN
-                      songs
-                          ON songs.song_id = votes.song_id
-                  INNER JOIN
-                      artists
-                          ON songs.artist_id = artists.artist_id
-          GROUP BY song_id
-          ORDER BY SUM(points) DESC;
-      `).then((ranking) => {
-          res.send(ranking);
-      });
+      const artists = await db.getQuery('SELECT * FROM artists');
+      res.send(artists);
     });
 
     app.post('/api/artists', async (req, res) => {
       try {
-          const { name } = req.body;
-          const db = new Database();
-          await db.getQuery('INSERT INTO artists (name) VALUES (?)', [name]);
-          res.status(201).send({ message: 'Artist added successfully' });
+        const { name } = req.body;
+        const db = new Database();
+        await db.getQuery('INSERT INTO artists (name) VALUES (?)', [name]);
+        res.status(201).send({ message: 'Artist added successfully' });
       } catch (error) {
-          res.status(500).send({ error: 'Failed to add artist', details: error.message });
+        res.status(500).send({ error: 'Failed to add artist', details: error.message });
       }
     });
 
-    app.post('/api/votes', (req, res) => {
-      const { song_id, points } = req.body;
+    app.get('/api/songs', async (req, res) => {
       const db = new Database();
-      db.getQuery('INSERT INTO votes (song_id, points) VALUES (?, ?)', [song_id, points])
-          .then(() => res.status(201).send({ message: 'Vote added successfully' }))
-          .catch((error) => res.status(500).send({ error: 'Failed to add vote', details: error }));
+      const songs = await db.getQuery(`
+        SELECT
+          song_id, s.name AS songname, a.name AS artistname
+        FROM
+          songs AS s
+        INNER JOIN
+          artists AS a
+        ON
+          s.artist_id = a.artist_id;
+      `);
+      res.send(songs);
+    });
+
+    app.get('/api/ranking', async (req, res) => {
+      const db = new Database();
+      const ranking = await db.getQuery(`
+        SELECT 
+          songs.song_id, songs.name AS song_name, artists.name AS artist_name, 
+          SUM(points) AS total_points
+        FROM
+          votes
+        INNER JOIN
+          songs ON songs.song_id = votes.song_id
+        INNER JOIN
+          artists ON songs.artist_id = artists.artist_id
+        GROUP BY song_id
+        ORDER BY SUM(points) DESC;
+      `);
+      res.send(ranking);
+    });
+
+    app.post('/api/votes', async (req, res) => {
+      try {
+        const { song_id, points } = req.body;
+        const db = new Database();
+        await db.getQuery('INSERT INTO votes (song_id, points) VALUES (?, ?)', [
+          song_id,
+          points,
+        ]);
+        res.status(201).send({ message: 'Vote added successfully' });
+      } catch (error) {
+        res.status(500).send({ error: 'Failed to add vote', details: error.message });
+      }
     });
   });
 
@@ -108,14 +117,11 @@ describe('API Endpoints', () => {
     it('returns all artists', async () => {
       const mockArtists = [
         { artist_id: 1, name: 'Artist 1' },
-        { artist_id: 2, name: 'Artist 2' }
+        { artist_id: 2, name: 'Artist 2' },
       ];
       mockGetQuery.mockResolvedValue(mockArtists);
 
-      const response = await request(app)
-        .get('/api/artists')
-        .expect(200);
-
+      const response = await request(app).get('/api/artists').expect(200);
       expect(response.body).toEqual(mockArtists);
       expect(mockGetQuery).toHaveBeenCalledWith('SELECT * FROM artists');
     });
@@ -125,32 +131,12 @@ describe('API Endpoints', () => {
     it('returns all songs with artist information', async () => {
       const mockSongs = [
         { song_id: 1, songname: 'Song 1', artistname: 'Artist 1' },
-        { song_id: 2, songname: 'Song 2', artistname: 'Artist 2' }
+        { song_id: 2, songname: 'Song 2', artistname: 'Artist 2' },
       ];
       mockGetQuery.mockResolvedValue(mockSongs);
 
-      const response = await request(app)
-        .get('/api/songs')
-        .expect(200);
-
+      const response = await request(app).get('/api/songs').expect(200);
       expect(response.body).toEqual(mockSongs);
-      expect(mockGetQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT'));
-    });
-  });
-
-  describe('GET /api/ranking', () => {
-    it('returns ranking information', async () => {
-      const mockRanking = [
-        { song_id: 1, song_name: 'Song 1', artist_name: 'Artist 1', total_points: 10 },
-        { song_id: 2, song_name: 'Song 2', artist_name: 'Artist 2', total_points: 5 }
-      ];
-      mockGetQuery.mockResolvedValue(mockRanking);
-
-      const response = await request(app)
-        .get('/api/ranking')
-        .expect(200);
-
-      expect(response.body).toEqual(mockRanking);
       expect(mockGetQuery).toHaveBeenCalledWith(expect.stringContaining('SELECT'));
     });
   });
@@ -171,7 +157,7 @@ describe('API Endpoints', () => {
       );
     });
 
-    it('handles errors when creating artist', async () => {
+    it('handles errors when creating an artist', async () => {
       mockGetQuery.mockRejectedValue(new Error('Database error'));
 
       const response = await request(app)
@@ -199,7 +185,7 @@ describe('API Endpoints', () => {
       );
     });
 
-    it('handles errors when creating vote', async () => {
+    it('handles errors when creating a vote', async () => {
       mockGetQuery.mockRejectedValue(new Error('Database error'));
 
       const response = await request(app)

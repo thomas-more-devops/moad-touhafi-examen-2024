@@ -36,12 +36,12 @@
         data() {
             return {
                 ranking: [],
-                apiUrl: process.env.VUE_APP_BACKEND_API_URL
+                apiUrl: process.env.VUE_APP_BACKEND_API_URL || "/api"
             }
         },
         methods: {
             fetchRanking() {
-                fetch(`${this.apiUrl}/api/ranking`)
+                fetch(`${this.apiUrl}/ranking`)
                     .then(response => response.json())
                     .then(data => {
                         console.log(data);

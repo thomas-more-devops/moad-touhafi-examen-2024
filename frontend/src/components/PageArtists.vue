@@ -30,19 +30,19 @@
             return {
                 artists: [],
                 newArtist: "",
-                apiUrl: process.env.VUE_APP_BACKEND_API_URL
+                apiUrl: process.env.VUE_APP_BACKEND_API_URL || "/api"
             }
         },
         methods: {
             fetchArtists() {
-                fetch(`${this.apiUrl}/api/artists`)
-                    .then(response => response.json())
+                fetch(`${this.apiUrl}/artists`)
+                .then(response => response.json())
                     .then(data => {
                         this.artists = data;
                     })
             },
             addArtist() {
-                fetch(`${this.apiUrl}/api/artists`, {
+                fetch(`${this.apiUrl}/artists`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

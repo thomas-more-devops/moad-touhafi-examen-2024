@@ -37,12 +37,12 @@
                 songs: [],
                 votesSended: [],
                 activeSongIndex: 0,
-                apiUrl: process.env.VUE_APP_BACKEND_API_URL
+                apiUrl: process.env.VUE_APP_BACKEND_API_URL || "/api"
             }
         },
         methods: {
             addVote(points) {
-                fetch(`${this.apiUrl}/api/votes`, {
+                fetch(`${this.apiUrl}/votes`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -63,7 +63,7 @@
                     })
             },
             fetchSongs() {
-                fetch(`${this.apiUrl}/api/songs`)
+                fetch(`${this.apiUrl}/songs`)
                     .then(response => response.json())
                     .then(data => {
                         this.songs = data;
