@@ -131,5 +131,10 @@ Zodra je bestanden wijzigt, herstart/hot-reload de containers.
 ---
 
 ## Licentie
+<<<<<<< HEAD
 Dit project is gemaakt in het kader van de DevOps-opleiding.
 ---
+=======
+Dit project is gemaakt in het kader van hat vak DevOps.
+---
+>>>>>>> e123b64847ccc0c00d7214faec584d467d7c536e
