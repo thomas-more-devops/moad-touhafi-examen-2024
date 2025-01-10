@@ -7,7 +7,7 @@ import Database from './classes/database.js';
 
 // Winston & Morgan importeren
 import morgan from 'morgan';
-import logger from './logger.js';  // <-- Je eigen logger.js
+import logger from './logger.js';  // Je eigen logger.js
 
 // Load environment variables
 dotenv.config();
@@ -28,13 +28,25 @@ app.use(morgan('combined', {
 
 // Enable CORS
 app.use(cors({
-    origin: process.env.cors_origin,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: process.env.cors_origin || '*', // Optioneel: Standaard alle origins toegestaan
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
+
+// Middleware to log requests (optioneel extra logging)
+app.use((req, res, next) => {
+  logger.info({
+    event: 'RequestReceived',
+    method: req.method,
+    url: req.url,
+    body: req.body,
+    headers: req.headers,
+  });
+  next();
+});
 
 // Simple route
 app.get('/', (req, res) => {
@@ -52,12 +64,10 @@ app.get('/api/artists', async (req, res) => {
     const artists = await db.getQuery('SELECT * FROM artists');
     res.send(artists);
   } catch (error) {
-    // Gestructureerde error-log
     logger.error({
       event: 'FailedToFetchArtists',
       message: error.message,
       stack: error.stack,
-      // evt. meer context, bijv. user: req.user?.id
     });
     res.status(500).send({ error: 'Failed to fetch artists', details: error.message });
   }
@@ -136,7 +146,7 @@ app.post('/api/artists', async (req, res) => {
       event: 'FailedToAddArtist',
       message: error.message,
       stack: error.stack,
-      requestBody: req.body, // Extra info, optioneel
+      requestBody: req.body,
     });
     res.status(500).send({ error: 'Failed to add artist', details: error.message });
   }

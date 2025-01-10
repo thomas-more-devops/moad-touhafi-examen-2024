@@ -1,3 +1,5 @@
+# Moad Touhafi
+---
 # Examen-2024: Eurosong-Project
 
 Dit project demonstreert hoe je DevOps-principes toepast in een Node.js + Vue-applicatie, met Docker, GitHub Actions en gestructureerde logging.
