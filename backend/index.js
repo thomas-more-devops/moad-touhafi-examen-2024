@@ -17,7 +17,7 @@ const app = express();
 
 // Configure the server
 const port = process.env.PORT || 3000;
-const host = process.env.HOST || 'localhost';
+const host = '0.0.0.0';
 
 // Morgan vangt alle HTTP-requests af en logt deze via Winston
 app.use(morgan('combined', {
@@ -27,11 +27,13 @@ app.use(morgan('combined', {
 }));
 
 // Enable CORS
+const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:8080';
 app.use(cors({
-    origin: process.env.cors_origin,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: corsOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
 
 // Middleware to parse JSON requests
 app.use(bodyParser.json());
@@ -178,6 +180,21 @@ app.post('/api/votes', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send({ status: 'UP', timestamp: new Date().toISOString() });
+});
+
+// Simple route
+app.get('/', (req, res) => {
+  logger.info({ 
+    event: 'HelloWorldEndpointHit', 
+    message: 'Root endpoint was called' 
+  });
+  res.send('Hello World!');
+});
+
+console.log("testt");
 // Start the server
 app.listen(port, host, () => {
   logger.info({ 

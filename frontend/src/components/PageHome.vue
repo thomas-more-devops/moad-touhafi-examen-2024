@@ -1,7 +1,7 @@
 <template>
     <div>
         <h1>
-            Welkom op eurosong.be
+            Welkom op eurosong.bee
         </h1>
 
         <p>

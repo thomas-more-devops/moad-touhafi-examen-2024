@@ -41,7 +41,7 @@
         },
         methods: {
             fetchRanking() {
-                fetch(`${this.apiUrl}/ranking`)
+                fetch(`${this.apiUrl}/api/ranking`)
                     .then(response => response.json())
                     .then(data => {
                         console.log(data);
