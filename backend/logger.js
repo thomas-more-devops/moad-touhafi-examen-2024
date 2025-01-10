@@ -1,24 +1,13 @@
-// logger.js
 import { createLogger, format, transports } from 'winston';
 import expressWinston from 'express-winston';
 
-const { combine, timestamp, json, printf } = format;
-
-// Custom log format (optioneel, voor meer flexibiliteit in de logs)
-const customFormat = printf(({ level, message, timestamp, ...metadata }) => {
-  let msg = `${timestamp} [${level}]: ${message}`;
-  if (Object.keys(metadata).length > 0) {
-    msg += ` | Metadata: ${JSON.stringify(metadata)}`;
-  }
-  return msg;
-});
+const { combine, timestamp, json } = format;
 
 const logger = createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: combine(
     timestamp(),
-    json(), // Zorgt voor gestructureerde JSON-uitvoer
-    // customFormat // Gebruik indien nodig een aangepaste formattering
+    json() // Zorgt voor gestructureerde JSON-uitvoer
   ),
   defaultMeta: { serviceName: 'backend-service' }, // Voeg standaard metadata toe
   transports: [
