@@ -24,16 +24,16 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
       - name: Build and Push Backend Image
         run: |
-          docker build -t ghcr.io/moadt18/examen-2024-backend:latest -t ghcr.io/moadt18/examen-2024-backend:${{ github.sha }} ./backend
-          docker push ghcr.io/moadt18/examen-2024-backend:latest
-          docker push ghcr.io/moadt18/examen-2024-backend:${{ github.sha }}
+          docker build -t ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-backend:latest -t ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-backend:${{ github.sha }} ./backend
+          docker push ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-backend:latest
+          docker push ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-backend:${{ github.sha }}
 
       - name: Build and Push Frontend Image
         run: |
-          docker build -t ghcr.io/moadt18/examen-2024-frontend:latest -t ghcr.io/moadt18/examen-2024-frontend:${{ github.sha }} ./frontend
-          docker push ghcr.io/moadt18/examen-2024-frontend:latest
-          docker push ghcr.io/moadt18/examen-2024-frontend:${{ github.sha }}
+          docker build -t ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-frontend:latest -t ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-frontend:${{ github.sha }} ./frontend
+          docker push ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-frontend:latest
+          docker push ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-frontend:${{ github.sha }}

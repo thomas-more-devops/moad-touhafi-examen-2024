@@ -18,7 +18,7 @@ services:
 
   backend:
     build: ./backend
-    image: ghcr.io/moadt18/examen-2024-backend:latest
+    image: ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-backend:latest
     ports:
       - "3000:3000"
     environment:
@@ -39,7 +39,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: ghcr.io/moad-touhafi/examen-2024-frontend:latest
+    image: ghcr.io/thomas-more-devops/moad-touhafi-examen-2024-frontend:latest
     ports:
       - "8080:80"
     environment:
