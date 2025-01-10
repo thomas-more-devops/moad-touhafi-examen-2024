@@ -1,20 +1,40 @@
-# 1. Use Node.js image as a base
-FROM node:18
+# Development Stage
+FROM node:18 AS development
 
-# 2. Set working directory
+# Set working directory
 WORKDIR /app
 
-# 3. Copy package.json and package-lock.json
+# Copy package.json and install all dependencies
 COPY package*.json ./
-
-# 4. Install Node.js dependencies
 RUN npm install
 
-# 5. Copy the rest of the application files
+# Install nodemon globally for live updates
+RUN npm install -g nodemon
+
+# Copy the rest of the application files
 COPY . .
 
-# 6. Expose the backend port
+# Expose port for development server
 EXPOSE 3000
 
-# 7. Run the application
+# Start the development server with nodemon
+CMD ["nodemon", "index.js"]
+
+# Production Stage
+FROM node:18 AS production
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and install only production dependencies
+COPY package*.json ./
+RUN npm install --only=production
+
+# Copy application files (excluding dev-only files like .env.local)
+COPY . .
+
+# Expose port for the backend server
+EXPOSE 3000
+
+# Start the production server
 CMD ["node", "index.js"]

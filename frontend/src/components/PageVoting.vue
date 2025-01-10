@@ -42,7 +42,7 @@
         },
         methods: {
             addVote(points) {
-                fetch(`${this.apiUrl}/votes`, {
+                fetch(`${this.apiUrl}/api/votes`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -63,7 +63,7 @@
                     })
             },
             fetchSongs() {
-                fetch(`${this.apiUrl}/songs`)
+                fetch(`${this.apiUrl}/api/songs`)
                     .then(response => response.json())
                     .then(data => {
                         this.songs = data;
